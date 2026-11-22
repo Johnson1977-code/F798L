@@ -24,21 +24,23 @@
             ranges = <0x0 0x2003c000 0x4000>;
 
             sqspi: sqspi@3b40 {
-                compatible = "nordic,nrf-sqspi";
-                reg = <0x3b40 0x200>;
-                status = "okay";
-                #address-cells = <1>;
-                #size-cells = <0>;
-                zephyr,pm-device-runtime-auto;
+            compatible = "nordic,nrf-sqspi";
+            reg = <0x3b40 0x200>;
+            status = "okay";
+            #address-cells = <1>;
+            #size-cells = <0>;
+            zephyr,pm-device-runtime-auto;
+            label = "sqspi";                    /* 可选，仅为可读性 */
+            ce-gpios = <&gpio2 5 GPIO_ACTIVE_LOW>;   /* 和 SDP_MSPI_CS0 同脚，软件 CS */
 
-                st7801n: st7801n@0 {
-                    compatible = "sitronix,st7801n";
-                    reg = <0>;
-                    width = <466>;
-                    height = <466>;
-                    reset-gpios = <&gpio2 6 GPIO_ACTIVE_LOW>;
-                    te-gpios    = <&gpio2 8 GPIO_ACTIVE_HIGH>;
-                    status = "okay";
+            st7801n: st7801n@0 {
+                compatible = "sitronix,st7801n";
+                reg = <0>;
+                width = <466>;
+                height = <466>;
+                reset-gpios = <&gpio2 6 GPIO_ACTIVE_LOW>;
+                te-gpios    = <&gpio2 8 GPIO_ACTIVE_HIGH>;
+                status = "okay";
                 };
             };
         };
