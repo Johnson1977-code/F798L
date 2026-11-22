@@ -1,0 +1,52 @@
+description: ST7801N display panel over sQSPI/MSPI
+
+compatible: "sitronix,st7801n"
+
+include: [base.yaml, display-controller.yaml]
+
+properties:
+  reg:
+    type: int
+    required: true
+    description: Chip select index
+
+  reset-gpios:
+    type: phandle-array
+    description: Reset GPIO
+
+  dc-gpios:
+    type: phandle-array
+    description: Data/Command GPIO
+
+  te-gpios:
+    type: phandle-array
+    description: Tearing effect GPIO
+
+  qspi-clock-hz:
+    type: int
+    description: sQSPI clock frequency in Hz
+
+  horiz-resolution:
+    type: int
+    required: true
+    description: Panel width in pixels
+
+  vert-resolution:
+    type: int
+    required: true
+    description: Panel height in pixels
+
+  horiz-offset:
+    type: int
+    default: 0
+    description: Horizontal offset
+
+  vert-offset:
+    type: int
+    default: 0
+    description: Vertical offset
+
+  pixel-format:
+    type: string
+    default: "RGB565"
+    description: Pixel format string

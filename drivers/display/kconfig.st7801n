@@ -1,0 +1,6 @@
+config DISPLAY_ST7801N
+    bool "ST7801N panel driver (sQSPI/MSPI)"
+    default y
+    depends on DISPLAY && MSPI_NRF_SQSPI
+    help
+      ST7801N over nRF54L15 sQSPI (MSPI shim)
