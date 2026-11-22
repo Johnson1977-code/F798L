@@ -343,7 +343,7 @@ static int st7801n_init(const struct device *dev)
     d->dev_id.dev_idx = 0;
     d->inited = false;
 
-    printk("st7801n probe done\n");
+    printk("st7801n probe done!!\n");
     return 0;
 }
 
