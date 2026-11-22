@@ -37,15 +37,32 @@ struct st7801n_data {
  *   SPI opcode = 0x02（单线写）
  *   data_buf   = DCS 前缀 + DCS 命令 + 参数
  */
+static uint8_t st7801n_rev8(uint8_t b)
+{
+	b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+	b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+	b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+	return b;
+}
+
+/* 整块反转，用于发送前 */
+static void st7801n_revbuf(uint8_t *p, size_t n)
+{
+	for (size_t i = 0; i < n; i++) {
+		p[i] = st7801n_rev8(p[i]);
+	}
+}
+
 static int st7801n_dcs_raw(const struct device *dev,
 			   const uint8_t *bytes, size_t len)
 {
 	struct st7801n_data *d = dev->data;
 
+	/* 不再反转，直接用原字节 */
 	struct mspi_xfer_packet pkt = {
 		.dir       = MSPI_TX,
 		.cb_mask   = MSPI_BUS_NO_CB,
-		.cmd       = 0x02,	/* QSPI 单线写指令 */
+		.cmd       = 0x02,
 		.address   = 0,
 		.num_bytes = len,
 		.data_buf  = (uint8_t *)bytes,
@@ -56,7 +73,7 @@ static int st7801n_dcs_raw(const struct device *dev,
 		.xfer_mode   = MSPI_PIO,
 		.cmd_length  = 1,
 		.addr_length = 0,
-		.hold_ce     = false,
+		.hold_ce     = true,		/* ← 改这里 */
 		.packets     = &pkt,
 		.num_packet  = 1,
 		.timeout     = 1000,
@@ -128,6 +145,7 @@ static int st7801n_write_pixels(const struct device *dev,
 	 * 先发 0x2C（Memory Write）命令，再发像素数据。
 	 * 拼成一条 SPI 事务：opcode=0x02, data={0x2C, pixel...}
 	 */
+
 	uint8_t *tx = k_malloc(1 + len);
 	if (!tx) {
 		return -ENOMEM;
@@ -150,7 +168,7 @@ static int st7801n_write_pixels(const struct device *dev,
 		.xfer_mode   = MSPI_PIO,
 		.cmd_length  = 1,
 		.addr_length = 0,
-		.hold_ce     = false,
+		.hold_ce     = true,
 		.packets     = &pkt,
 		.num_packet  = 1,
 		.timeout     = 2000,
@@ -336,7 +354,8 @@ static int st7801n_init(const struct device *dev)
 
 	/* 4. 必须先 dev_config */
 	struct mspi_dev_cfg dc = {
-		.freq        = 4000000,
+		.freq        = 32000000,
+		//.io_mode     = MSPI_IO_MODE_QUAD_1_1_4,
 		.io_mode     = MSPI_IO_MODE_SINGLE,
 		.data_rate   = MSPI_DATA_RATE_SINGLE,
 		.cpp         = MSPI_CPP_MODE_0,
